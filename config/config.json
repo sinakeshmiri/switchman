@@ -1,0 +1,24 @@
+{   
+    "interface":"auto",
+    "maindomin":"secgw.ompfinex.tech",
+    "nsprovider":{
+        "type":"cloudflare",
+        "key":""
+    },
+    "upstreams":[
+        {
+            "ip":"5.5.5.5",
+            "healthcheck":{
+                "type": "tcp",
+                "endpoint": "5.5.15.176:666"
+            }
+        },
+        {
+            "ip":"5.34.196.92",
+            "healthcheck":{
+                "type": "http",
+                "endpoint": "http://google.com"
+            }
+        }
+    ]
+}
