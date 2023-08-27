@@ -1,6 +1,6 @@
 {   
     "interface":"auto",
-    "maindomin":"secgw.ompfinex.tech",
+    "maindomin":"ha.example.com",
     "nsprovider":{
         "type":"cloudflare",
         "key":""
