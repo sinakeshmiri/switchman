@@ -38,7 +38,7 @@ jobs:
           TAG_CONTEXT: repo
         
     - name: Build
-      run: cd cmd && go build -o switchman-${{ steps.bump-version.outputs.tag }}
+      run: cd cmd && go build -o switchman-linux-amd64-${{ steps.bump-version.outputs.tag }}
           
     - name: Create Release
       id: create-release
@@ -57,6 +57,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: ./cmd/switchman-${{ steps.bump-version.outputs.tag }}
-        asset_name: switchman-${{ steps.bump-version.outputs.tag }}
+        asset_path: ./cmd/switchman-linux-amd64-${{ steps.bump-version.outputs.tag }}
+        asset_name: switchman-linux-amd64-${{ steps.bump-version.outputs.tag }}
         asset_content_type: application/octet-stream
