@@ -1,0 +1,62 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.20'
+
+    - name: Try Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: Bump version and push tag
+      id: bump-version
+      uses: anothrNick/github-tag-action@1.67.0
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch
+          INITIAL_VERSION: 0.1.0
+          TAG_CONTEXT: repo
+        
+    - name: Build
+      run: cd cmd && go build -o switchman-linux-amd64-${{ steps.bump-version.outputs.tag }}
+          
+    - name: Create Release
+      id: create-release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.bump-version.outputs.tag }}
+        release_name: ${{ steps.bump-version.outputs.tag }}
+        draft: false
+        prerelease: false
+
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        asset_path: ./cmd/switchman-linux-amd64-${{ steps.bump-version.outputs.tag }}
+        asset_name: switchman-linux-amd64-${{ steps.bump-version.outputs.tag }}
+        asset_content_type: application/octet-stream
