@@ -26,6 +26,7 @@ func NewApplication(
 // update record will check all available services and find out wich service is up and running
 // then updates the record if the preferd service is down
 func (apia Application) Check() error {
+	isPrimaryUp :=false
 	found :=false
 	ips, err := apia.nsprovider.GetRecords(apia.maindomin)
 	if err != nil {
@@ -38,13 +39,16 @@ func (apia Application) Check() error {
 			if item == ds.GetIP() {
 				found = true
 				err = ds.CheckHealth()
-				if err != nil {
+				if err != nil || (isPrimaryUp && !ds.IsPrimary()) {
 					log.Println(err)
 					err = apia.nsprovider.DelRecord(apia.maindomin, ds.GetIP())
 					if err != nil {
 						return err
 					}
+				}else if(ds.IsPrimary()){
+					isPrimaryUp=true
 				}
+				
 				break // Exit the loop early since we found the target
 			}
 		}
@@ -53,6 +57,9 @@ func (apia Application) Check() error {
 			if err != nil {
 				log.Println(err)
 			} else {
+				if ds.IsPrimary(){
+					isPrimaryUp=true
+				}
 				err = apia.nsprovider.SetRecord(apia.maindomin, ds.GetIP())
 				if err != nil {
 					return err

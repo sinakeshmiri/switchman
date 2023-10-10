@@ -6,14 +6,16 @@
         "key":"CFTOKEN"
     },
     "upstreams":[
-        {
+        {   
+            "primary" : true,
             "ip":"2.2.2.2",
             "healthcheck":{
                 "type": "http",
                 "endpoint": "http://localhost:8081"
             }
         },
-        {
+        {   
+            "primary" : false,
             "ip":"1.1.1.1",
             "healthcheck":{
                 "type": "tcp",

@@ -10,20 +10,24 @@ import (
 )
 
 type Healthcheck struct {
-	Type string	`json:"type"`
-	Uri  string	`json:"endpoint"`
+	Type string `json:"type"`
+	Uri  string `json:"endpoint"`
 }
 
 type Adapter struct {
+	Primary        bool
 	IP             string
 	HealthcheckUri Healthcheck
 }
 
 // NewAdapter creates a new Adapter
-func NewAdapter(healthcheckUri Healthcheck, ip string) (*Adapter, error) {
-	return &Adapter{HealthcheckUri: healthcheckUri, IP: ip}, nil
+func NewAdapter(healthcheckUri Healthcheck, ip string,primary bool) (*Adapter, error) {
+	return &Adapter{HealthcheckUri: healthcheckUri, IP: ip,Primary: primary}, nil
 }
 
+func (dsa Adapter) IsPrimary() bool{
+	return dsa.Primary
+}
 func (dsa Adapter) GetIP() string {
 	return dsa.IP
 }
@@ -52,7 +56,7 @@ func (dsa Adapter) CheckHealth() error {
 
 		conn, err := net.Dial("tcp", fmt.Sprintf("%s:%s", ip, port))
 		if err != nil {
-			return errors.New("Port not open:"+ ip+ port)
+			return errors.New("Port not open:" + ip + port)
 		}
 
 		defer conn.Close()

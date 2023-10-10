@@ -7,6 +7,7 @@ type NsproviderPort interface {
 }
 
 type DownStreamPort interface {
+	IsPrimary()(bool)
 	GetIP()(string)
 	CheckHealth() (error)
 }

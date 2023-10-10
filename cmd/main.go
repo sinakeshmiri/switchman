@@ -9,8 +9,8 @@ import (
 	"github.com/sinakeshmiri/switchman/internal/application/api"
 
 	// adapters
-	"github.com/sinakeshmiri/switchman/internal/adapters/framework/left/http"
 	"github.com/sinakeshmiri/switchman/internal/adapters/framework/left/auto"
+	"github.com/sinakeshmiri/switchman/internal/adapters/framework/left/http"
 	"github.com/sinakeshmiri/switchman/internal/adapters/framework/right/downstream"
 	"github.com/sinakeshmiri/switchman/internal/adapters/framework/right/nsprovider/cf"
 
@@ -24,10 +24,10 @@ type NSProvider struct {
 }
 
 type Upstream struct {
-	IP          string `json:"ip"`
+	Primary     bool                   `json:"primary"`
+	IP          string                 `json:"ip"`
 	HealthCheck downstream.Healthcheck `json:"healthcheck"`
 }
-
 
 type Config struct {
 	Intrerface string     `json:"interface"`
@@ -51,8 +51,8 @@ func main() {
 	if config.NSProvider.Type != "cloudflare" {
 		log.Fatal("Error NSprovider is  not impelmented")
 	}
-	for _, u := range config.Upstreams{
-		if u.HealthCheck.Type != "http" && u.HealthCheck.Type != "tcp"{
+	for _, u := range config.Upstreams {
+		if u.HealthCheck.Type != "http" && u.HealthCheck.Type != "tcp" {
 			log.Fatal("healthceck type is  not impelmented")
 
 		}
@@ -64,6 +64,7 @@ func main() {
 	var downstreams []ports.DownStreamPort
 	for _, s := range config.Upstreams {
 		downstreams = append(downstreams, downstream.Adapter{
+			Primary:        s.Primary,
 			IP:             s.IP,
 			HealthcheckUri: s.HealthCheck,
 		})
