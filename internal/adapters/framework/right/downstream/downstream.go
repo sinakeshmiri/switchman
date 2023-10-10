@@ -52,7 +52,7 @@ func (dsa Adapter) CheckHealth() error {
 
 		conn, err := net.Dial("tcp", fmt.Sprintf("%s:%s", ip, port))
 		if err != nil {
-			return errors.New("Port not open")
+			return errors.New("Port not open:"+ ip+ port)
 		}
 
 		defer conn.Close()

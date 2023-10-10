@@ -1,23 +1,23 @@
 {   
     "interface":"auto",
-    "maindomin":"secgw.ompfinex.tech",
+    "maindomin":"temptest.x.com",
     "nsprovider":{
         "type":"cloudflare",
-        "key":""
+        "key":"CFTOKEN"
     },
     "upstreams":[
         {
-            "ip":"5.5.5.5",
+            "ip":"2.2.2.2",
             "healthcheck":{
-                "type": "tcp",
-                "endpoint": "5.5.15.176:666"
+                "type": "http",
+                "endpoint": "http://localhost:8081"
             }
         },
         {
-            "ip":"5.34.196.92",
+            "ip":"1.1.1.1",
             "healthcheck":{
-                "type": "http",
-                "endpoint": "http://google.com"
+                "type": "tcp",
+                "endpoint": "localhost:8080"
             }
         }
     ]

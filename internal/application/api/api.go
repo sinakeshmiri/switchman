@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"log"
 
 	"github.com/sinakeshmiri/switchman/internal/ports"
@@ -27,41 +26,39 @@ func NewApplication(
 // update record will check all available services and find out wich service is up and running
 // then updates the record if the preferd service is down
 func (apia Application) Check() error {
-	var ok bool
-	ip, err := apia.nsprovider.GetRecord(apia.maindomin)
+	found :=false
+	ips, err := apia.nsprovider.GetRecords(apia.maindomin)
 	if err != nil {
 		return err
 	}
-	for _, s := range apia.downstreams {
-		if s.GetIP() == ip {
-			err := s.CheckHealth()
-			if err == nil {
-				ok = true
-				break
-			} else {
-				ok = false
-			}
-		}
-	}
-	if !ok {
-		for _, s := range apia.downstreams {
-			err := s.CheckHealth()
-			if err == nil {
-				err = apia.nsprovider.SetRecord(apia.maindomin, s.GetIP())
+	
+	for _, ds := range apia.downstreams {
+		found =false
+		for _, item := range ips {
+			if item == ds.GetIP() {
+				found = true
+				err = ds.CheckHealth()
 				if err != nil {
 					log.Println(err)
-				} else {
-					ok = true
-					break
+					err = apia.nsprovider.DelRecord(apia.maindomin, ds.GetIP())
+					if err != nil {
+						return err
+					}
+				}
+				break // Exit the loop early since we found the target
+			}
+		}
+		if !found {
+			err = ds.CheckHealth()
+			if err != nil {
+				log.Println(err)
+			} else {
+				err = apia.nsprovider.SetRecord(apia.maindomin, ds.GetIP())
+				if err != nil {
+					return err
 				}
 			}
 		}
-		if !ok {
-			log.Println("No Host is alive")
-			return errors.New("No host is alvie")
-
-		}
-
 	}
 	return nil
 }

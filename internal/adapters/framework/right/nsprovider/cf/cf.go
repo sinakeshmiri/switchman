@@ -23,77 +23,90 @@ func NewAdapter(key string) (*Adapter, error) {
 	return &Adapter{api: api}, nil
 }
 
-func (cfa Adapter) extractZone(domin string) (string, error) {
+func (cfa Adapter) extractZone(domin string) (string,string, error) {
 	parts := strings.Split(domin, ".")
 	n := len(parts)
 	if n < 2 {
-		return "", errors.New("wrong domin format")
+		return "", "",errors.New("wrong domin format")
 	}
 	tld := parts[n-1]
 
 	sld := parts[n-2]
 
 	zoneName := sld + "." + tld
-
+	log.Println(zoneName)
 	id, err := cfa.api.ZoneIDByName(zoneName) // Assuming zoneName exists in your Cloudflare account already
 	if err != nil {
 		log.Println(err)
-		return "", err
+		return "","", err
 	}
-	return id, nil
+	return zoneName,id, nil
 }
 
-func (cfa Adapter) GetRecord(domin string) (string, error) {
-	id, err := cfa.extractZone(domin)
+func (cfa Adapter) GetRecords(domin string) ([]string, error) {
+	_,id, err := cfa.extractZone(domin)
 	if err != nil {
 		log.Println(err)
-		return "", err
+		return nil, err
 	}
 	records, _, err := cfa.api.ListDNSRecords(context.Background(), cloudflare.ZoneIdentifier(id), cloudflare.ListDNSRecordsParams{})
 	if err != nil {
 		log.Println(err)
-		return "", err
+		return nil, err
 	}
-	r := cloudflare.DNSRecord{}
+	r := []string{}
 	for _, rec := range records {
 		if rec.Name == domin {
-			r = rec
+			r = append(r, rec.Content)
 		}
 	}
-	return r.Content, nil
+	return r, nil
 
 }
+
+func (cfa Adapter) DelRecord(domin string,value string) ( error) {
+	_,zid, err := cfa.extractZone(domin)
+	if err != nil {
+		log.Println(err)
+		return  err
+	}
+	records, _, err := cfa.api.ListDNSRecords(context.Background(), cloudflare.ZoneIdentifier(zid), cloudflare.ListDNSRecordsParams{})
+	if err != nil {
+		log.Println(err)
+		return  err
+	}
+
+	for  _,r:= range records {
+		if(r.Name==domin&&r.Content==value){
+			return  cfa.api.DeleteDNSRecord(context.Background(), cloudflare.ZoneIdentifier(zid),r.ID)
+		}
+	}
+	
+	return errors.New("dns rcord not found")
+}
+
 
 func (cfa Adapter) SetRecord(domin string, value string) error {
-	id, err := cfa.extractZone(domin)
+	zname,id, err := cfa.extractZone(domin)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	records, _, err := cfa.api.ListDNSRecords(context.Background(), cloudflare.ZoneIdentifier(id), cloudflare.ListDNSRecordsParams{})
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	r := cloudflare.DNSRecord{}
-	for _, rec := range records {
-		if rec.Name == domin {
-			r = rec
-		}
-	}
-
-	_, err = cfa.api.UpdateDNSRecord(context.Background(), cloudflare.ZoneIdentifier(id), cloudflare.UpdateDNSRecordParams{
-		ID:       r.ID,
-		Content:  value,
-		Type:     r.Type,
-		Name:     r.Name,
-		Data:     r.Data,
-		Priority: r.Priority,
-		TTL:      r.TTL,
-		Proxied:  r.Proxied,
-		Comment:  r.Comment,
-		Tags:     r.Tags,
+	f:=false
+	_,err=cfa.api.CreateDNSRecord(context.Background(), cloudflare.ZoneIdentifier(id),cloudflare.CreateDNSRecordParams{
+		Type: "A",
+		Tags: nil,
+		Proxiable: true,
+		ZoneName: zname,
+		ZoneID: id,
+		Data: nil,
+		TTL:60,
+		Proxied: &f,
+		Name: domin,
+		Content: value,
+		Comment: "",
 	})
+
 	if err != nil {
 		return err
 	}
