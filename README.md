@@ -13,6 +13,7 @@ Fill variables in config/config.json
 
 ## TODO
 - [ ] k8s integration
+- [ ] better cmdline options (env vars, logging options, ...)
 - [ ] add tests
 - [ ] add more dns APIs
 - [ ] README: how to deploy LoadBalancers in HA mode
