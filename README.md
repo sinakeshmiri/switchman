@@ -12,6 +12,7 @@ Switchman continuously healthchecks the upstreams and update A records according
 Fill variables in config/config.json
 
 ## TODO
+- [ ] k8s integration
 - [ ] add tests
 - [ ] add more dns APIs
 - [ ] README: how to deploy LoadBalancers in HA mode
