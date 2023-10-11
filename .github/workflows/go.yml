@@ -33,9 +33,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
-          DEFAULT_BUMP: patch
           INITIAL_VERSION: 0.1.0
-          TAG_CONTEXT: repo
         
     - name: Build
       run: cd cmd && go build -o switchman-linux-amd64-${{ steps.bump-version.outputs.tag }}
