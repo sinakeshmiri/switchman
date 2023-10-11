@@ -4,10 +4,11 @@
 name: Go
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    types:
+      - closed
+    branches:
+      - main
 
 permissions:
   contents: write
