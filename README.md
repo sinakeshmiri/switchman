@@ -5,6 +5,9 @@ This is useful in case you have multiple LoadBalancers and you want to distribut
 
 Switchman continuously healthchecks the upstreams and update A records accordingly.
 
+Also take a look at [external-dns](https://github.com/kubernetes-sigs/external-dns), A production-ready tool that works in k8s like a charm 
+(external-dns doesn't support health-checking mechanisms itself).
+
 ## Supported dns APIs
 - Cloudflare 
 
