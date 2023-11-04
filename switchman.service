@@ -1,0 +1,16 @@
+[Unit]
+Description=Switchman service
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+User=secops
+WorkingDirectory=/etc/switchman
+PIDFile=/run/switchman.pid
+ExecStart=/usr/bin/switchman
+ExecStop=/bin/kill -s QUIT $MAINPID
+Restart=always
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
